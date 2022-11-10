@@ -14,6 +14,8 @@ Student ID: W1641460
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+//define port
+#define PORT 22
 
 //define primitives
 #define START_IDENTIFIER  0XFFFF
@@ -64,6 +66,27 @@ struct RejectPacket{
 
 int main(int argc, char **argv)
 {
+	struct DataPacket datapacket;
+	struct ACKPacket Ackpacket;
+	struct RejectPacket rejectpacket;
+
+	int sockfd;
+	struct sockaddr_in server_addr;
+	socklen_t addr_size;
+	char *ip = "127.0.0.1";
+
+	//create socket
+	sockfd = socket(AF_INET, SOCK_DGRAM,0);
+	bzero(&server_addr, sizeof(server_addr));
+
+	//assign address
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(PORT);
+	server_addr.sin_addr.s_addr = inet_addr(ip);
+	
+	//binding socket
+	bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+
 
 
 
