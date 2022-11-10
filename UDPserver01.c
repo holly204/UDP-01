@@ -34,32 +34,32 @@ Student ID: W1641460
 
 //structure of Data Packet
 struct DataPacket{
-	unit16_t StartPacketId;
-	unit8_t ClientId;
-	unit16_t Data;
-	unit8_t SegmentNo;
-	unit8_t Length;
+	uint16_t StartPacketId;
+	uint8_t ClientId;
+	uint16_t Data;
+	uint8_t SegmentNo;
+	uint8_t Length;
 	unsigned int Payload;
-	unit16_t EndPacketId;	
-}
+	uint16_t EndPacketId;	
+};
 
 //Structure of ACK packet
 struct ACKPacket{
-	unit16_t StartPacketId;
-	unit8_t ClientId;
-	unit16_t ACK;
-	unit8_t ReceivedSegmentNo;
-	unit16_t EndPacketId;
-}
+	uint16_t StartPacketId;
+	uint8_t ClientId;
+	uint16_t Ack;
+	uint8_t ReceivedSegmentNo;
+	uint16_t EndPacketId;
+};
 //structure of Reject Pakcet
 struct RejectPacket{
-	unit16_t StartPacketId;
-	unit8_t ClientId;
-	unit16_t Reject;
-	unit16_t Reject_sub_code;
-	unit8_t ReceivedSegmentNo;
-	unit16 EndPacketId;
-}
+	uint16_t StartPacketId;
+	uint8_t ClientId;
+	uint16_t Reject;
+	uint16_t Reject_sub_code;
+	uint8_t ReceivedSegmentNo;
+	uint16_t EndPacketId;
+};
 
 
 int main(int argc, char **argv)
