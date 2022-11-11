@@ -71,7 +71,7 @@ int main()
         struct sockaddr_in server_addr, client_addr;
         char buffer[1024];
         socklen_t addr_size;
-        int n;
+        int b;
 
         sockfd = socket(AF_INET, SOCK_DGRAM, 0);
         if (sockfd < 0){
@@ -84,8 +84,8 @@ int main()
         server_addr.sin_port = htons(PORT);
         server_addr.sin_addr.s_addr = inet_addr(ip);
 	
-	n = bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
-        if(n < 0){
+	b = bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+        if(b < 0){
                 perror("[-]bind error");
                 exit(1);
         }
