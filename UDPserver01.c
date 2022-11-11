@@ -62,20 +62,33 @@ struct RejectPacket{
 	uint16_t EndPacketId;
 };
 
+//function to print packets contents
+void show(struct DataPacket dtp){
+	printf("\nStart of Packet id:%x\n", dtp.StartPacketId);
+	printf("\nClient ID:%x\n", dtp.ClientId);
+	printf("\nDATA:%x\n",dtp.Data);
+	printf("\nSegment No:%x\n", dtp.SegmentNo);
+	printf("\nLength:%x\n", dtp.SegmentNo);
+	printf("\nPayload:%x\n", dtp.Payload);
+	printf("\nEnd of Packet id:%x\n", dtp.EndPacketId);
+
+}
+
+
+
 int main()
 {
 
         char *ip = "127.0.0.1";
 
-        int sockfd;
+        int sockfd, b;
         struct sockaddr_in server_addr, client_addr;
         char buffer[1024];
         socklen_t addr_size;
-        int b;
 
         sockfd = socket(AF_INET, SOCK_DGRAM, 0);
         if (sockfd < 0){
-                perror("[-]socket error");
+                perror("socket error!");
                 exit(1);
         }
 
@@ -86,19 +99,19 @@ int main()
 	
 	b = bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
         if(b < 0){
-                perror("[-]bind error");
+                perror("bind error!");
                 exit(1);
         }
 
 	bzero(buffer, 1024);
 	addr_size = sizeof(client_addr);
 	recvfrom(sockfd, buffer, 1024, 0,(struct sockaddr*)&client_addr, &addr_size);
-	printf("[+]Data recv: %s \n", buffer);
+	printf("Data recv: %s \n", buffer);
         
 	bzero(buffer, 1024);
 	strcpy(buffer, "Welcome to the UDP server!");
 	sendto(sockfd, buffer, 1024, 0, (struct sockaddr*)&client_addr, sizeof(client_addr));
-	printf("[+]Data send: %s\n", buffer);
+	printf("Data send: %s\n", buffer);
 
 	return 0;
 }
