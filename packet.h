@@ -2,7 +2,7 @@
 #define packet_h
 
 
-//define primitives
+//define pClientIdrimitives
 #define START_IDENTIFIER  0XFFFF
 #define END_IDENTIFIER  0XFFFF
 
