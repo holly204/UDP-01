@@ -84,6 +84,7 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
 		uint8_t *buffer = (uint8_t *)dp;
 
         	rev = recvfrom(sockfd, buffer, sizeof(DataPacket), 0,(struct sockaddr*)&client_addr, &addr_size);
+		printf("received %d bytes\n", rev);
 		show(*dp);
 	}
 

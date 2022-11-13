@@ -48,7 +48,7 @@ int main()
 
 
         for (int i=1; i<= COUNT; i++ ){
-                DataPacket packet = getDatapacket(11,2);
+                DataPacket packet = getDatapacket(11,i);
                 send_packet(sockfd, &addr, &packet);
         }
 
@@ -88,9 +88,13 @@ int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp) {
         // 3. If timeout, start timer, go back to 2 if not running out of retries
         // 4. If get ack / reject, check packet, return 0 for sucess, or error code for failures
         // 5. Print error (ack, reject wrong / final timeout), return final error cod
-	uint8_t *buffer = (uint8_t *)(&dp);
+	uint8_t *buffer = (uint8_t *)(dp);
+	for(int i = 0; i < sizeof(*dp); i++) {
+		printf("%x ", buffer[i]);
+	}
+	printf("\n");
         int ret = sendto(sockfd, buffer, sizeof(*dp),0, (struct sockaddr *)addr, sizeof(*addr));
-	printf("Packet send/n");
+	printf("Packet send %d bytes\n", ret);
 	return ret;
 }
 void show(struct DataPacket dtp){
