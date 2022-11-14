@@ -22,6 +22,8 @@ Student ID: W1641460
 DataPacket getDatapacket(int clientid, int n);
 //define a function for show datapacket
 void show(struct DataPacket dtp);
+void show_ack(struct ACKPacket ap);
+void show_rej(struct RejectPacket rp);
 // define send_packet function
 int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t addr_size); 
 
@@ -100,6 +102,7 @@ int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t 
 	addr_size = sizeof(addr);
 	printf("begin receive ack");
 	int rev_ack = recvfrom(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&addr, &addr_size);
+	show_ack(*ap);
 	printf("ACK received %d bytes\n", rev_ack);
 	for(int i = 0; i < sizeof(*ap); i++) {
                 printf("%x ", buffer[i]);
@@ -118,5 +121,23 @@ void show(struct DataPacket dtp){
         printf("\nPayload:%x\n", dtp.Payload);
         printf("\nEnd of Packet id:%x\n", dtp.EndPacketId);
 
+}
+void show_ack(struct ACKPacket ap){
+
+        printf("\nStart of Packet id:%x\n", ap.StartPacketId);
+        printf("\nClient id:%x\n", ap.ClientId);
+        printf("\nAck:%x\n", ap.Ack);
+        printf("\nreceived no:%x\n", ap.ReceivedSegmentNo);
+        printf("\nEnd of Packet id:%x\n", ap.EndPacketId);
+}
+
+void show_rej(struct RejectPacket rp){
+
+        printf("\nStart of Packet id:%x\n", rp.StartPacketId);
+        printf("\nClient id:%x\n", rp.ClientId);
+        printf("\nRej:%x\n", rp.Reject);
+        printf("\nreject sub no:%x\n", rp.Reject_sub_code);
+        printf("\nreceived no:%x\n", rp.ReceivedSegmentNo);
+        printf("\nEnd of Packet id:%x\n", rp.EndPacketId);
 }
 

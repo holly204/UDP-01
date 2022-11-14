@@ -22,6 +22,7 @@ void show(struct DataPacket dtp);
 
 ACKPacket generate_recv(struct DataPacket dp);
 void show_ack(struct ACKPacket ap);
+void show_rej(struct RejectPacket rp);
 int receive_packet(int sockfd,struct sockaddr_in*client_addr,socklen_t addr_size);
 
 int main()
@@ -112,7 +113,6 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
 		// Must use the addr_size from the previous recvfrom to specify addr length
 		int send_ack = sendto(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&client_addr, addr_size);
 		printf("ACK send ack %d bytes, errno=%d\n", send_ack, errno);
-
 	}
 
        	return rev;
@@ -137,3 +137,14 @@ void show_ack(struct ACKPacket ap){
         printf("\nreceived no:%x\n", ap.ReceivedSegmentNo);
 	printf("\nEnd of Packet id:%x\n", ap.EndPacketId);
 }
+
+void show_rej(struct RejectPacket rp){
+
+        printf("\nStart of Packet id:%x\n", rp.StartPacketId);
+        printf("\nClient id:%x\n", rp.ClientId);
+        printf("\nRej:%x\n", rp.Reject);
+        printf("\nreject sub no:%x\n", rp.Reject_sub_code);
+	printf("\nreceived no:%x\n", rp.ReceivedSegmentNo);
+        printf("\nEnd of Packet id:%x\n", rp.EndPacketId);
+}
+
