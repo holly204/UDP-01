@@ -119,7 +119,6 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
 	int last_seg = 0;
 	int response_type = 0;//0:ack, 1:out of sequence, 2:lenth mismatching, 3:End of packet missing, 4: duplicate
 	DataPacket *dp = malloc(sizeof(DataPacket));
-	ACKPacket *ap = malloc(sizeof(ACKPacket));
 	while(rev>0){
 		addr_size = sizeof(client_addr);
 		uint8_t *buffer = (uint8_t *)dp;
@@ -148,7 +147,8 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
 		if(dp->Length != strlen(dp->Payload)){
 			response_type = 2;
 		}
-		if (response_type ==0){
+		if (response_type == 0){
+			ACKPacket *ap = malloc(sizeof(ACKPacket));
 			*ap = generate_recv(*dp);
 			//show_ack(*ap);
 			buffer = (uint8_t *)ap;
@@ -163,13 +163,25 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
 			printf("ACK send ack %d bytes, errno=%d\n", send_ack, errno);
 		}
 		else{
-		
+			RejectPacket *rjp = malloc(sizeof(RejectPacket));
+			*rjp = generate_rej(*dp, response_type);
+			//show_ack(*ap);
+			buffer = (uint8_t *)rjp;
+
+	        	//for(int i = 0; i < sizeof(*rjp); i++) {
+        		//        printf("%x ", buffer[i]);
+        		//}
+        		//printf("\n");
+
+			// Must use the addr_size from the previous recvfrom to specify addr length
+			int send_rjk = sendto(sockfd, buffer, sizeof(RejectPacket), 0, (struct sockaddr*)&client_addr, addr_size);
+			printf("Rej send  %d bytes, errno=%d\n", send_rjk, errno);
+
 		}
-	}
-
        	return rev;
-}
 
+	}
+}
 
 void show(struct DataPacket dtp){
         printf("\nStart of Packet id:%x\n", dtp.StartPacketId);
