@@ -92,7 +92,17 @@ RejectPacket generate_rej(struct DataPacket dp, int Rej_sub_code){
         jp.StartPacketId = START_IDENTIFIER;
         jp.ClientId = dp.ClientId;
         jp.Reject = REJECT;
-	jp.Reject_sub_code = Rej_sub_code; 
+	if (Rej_sub_code == 1){
+		jp.Reject_sub_code = REJECT_OUT_SEQUENCE;
+	}else if(Rej_sub_code == 2){
+		jp.Reject_sub_code = REJECT_lENGTH_MISMATCH;
+	}else if(Rej_sub_code == 3){
+		jp.Reject_sub_code = REJECT_DATA_MISSING;
+	}else if(Rej_sub_code == 4){
+		jp.Reject_sub_code = REJECT_DUPLICATE;
+	}else{
+		jp.Reject_sub_code = 0;
+	}
         jp.ReceivedSegmentNo = dp.SegmentNo;
         jp.EndPacketId = END_IDENTIFIER;
         //printf("Generate ACK");
@@ -104,8 +114,10 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
         // 1. call recvfrom to receive packet from client
         // 2. check packet, if packet is wrong, print error
         // 3. if packet is correct, send ack to client, otherwise, send reject.
-        // 4. replace last packet seqno to be current packet seqno, if seqno = last seq + 1
+        // 4. replace last packet segno to be current packet seqno, if segno = last seg + 1
         int rev = 1;
+	int last_seg = 0;
+	int response_type = 0;//0:ack, 1:out of sequence, 2:lenth mismatching, 3:End of packet missing, 4: duplicate
 	DataPacket *dp = malloc(sizeof(DataPacket));
 	ACKPacket *ap = malloc(sizeof(ACKPacket));
 	while(rev>0){
@@ -113,20 +125,46 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
 		uint8_t *buffer = (uint8_t *)dp;
         	rev = recvfrom(sockfd, buffer, sizeof(DataPacket), 0,(struct sockaddr*)&client_addr, &addr_size);
 		printf("received %d bytes\n", rev);
-		show(*dp);
+		//show(*dp);
+		//chek segmentNO  seg = last_seg + 1 or seg == last_seg
+		if (dp->SegmentNo != last_seg + 1){
+			if(dp->SegmentNo == last_seg){
+				response_type = 4; //duplicate
+			}
+			else{
+				 response_type = 1; //out of sequence
+			}
+			printf("\nlast_seg:%d\n",last_seg);
+			printf("\nSegment No:%d\n",dp->SegmentNo);
+		}
+		last_seg = dp->SegmentNo;
 
-		*ap = generate_recv(*dp);
-		show_ack(*ap);
-		buffer = (uint8_t *)ap;
+		//check missing EndPacketId
+		if (dp->EndPacketId = 0){
+			response_type = 3;
+		}
 
-	        for(int i = 0; i < sizeof(*ap); i++) {
-        	        printf("%x ", buffer[i]);
-        	}
-        	printf("\n");
+		//check payload length
+		if(dp->Length != strlen(dp->Payload)){
+			response_type = 2;
+		}
+		if (response_type ==0){
+			*ap = generate_recv(*dp);
+			//show_ack(*ap);
+			buffer = (uint8_t *)ap;
 
-		// Must use the addr_size from the previous recvfrom to specify addr length
-		int send_ack = sendto(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&client_addr, addr_size);
-		printf("ACK send ack %d bytes, errno=%d\n", send_ack, errno);
+	        	//for(int i = 0; i < sizeof(*ap); i++) {
+        		//        printf("%x ", buffer[i]);
+        		//}
+        		//printf("\n");
+
+			// Must use the addr_size from the previous recvfrom to specify addr length
+			int send_ack = sendto(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&client_addr, addr_size);
+			printf("ACK send ack %d bytes, errno=%d\n", send_ack, errno);
+		}
+		else{
+		
+		}
 	}
 
        	return rev;

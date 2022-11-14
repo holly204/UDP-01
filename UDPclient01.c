@@ -110,12 +110,12 @@ int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t 
 	addr_size = sizeof(addr);
 	printf("begin receive ack");
 	int rev_ack = recvfrom(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&addr, &addr_size);
-	show_ack(*ap);
+	//show_ack(*ap);
 	printf("ACK received %d bytes\n", rev_ack);
-	for(int i = 0; i < sizeof(*ap); i++) {
-                printf("%x ", buffer[i]);
-        }
-        printf("\n");
+	//for(int i = 0; i < sizeof(*ap); i++) {
+        //        printf("%x ", buffer[i]);
+        //}
+        //printf("\n");
 
 	printf("Ack received");
 	return ret;
