@@ -55,12 +55,34 @@ int main()
         addr.sin_family = AF_INET;
         addr.sin_port = htons(PORT);
         addr.sin_addr.s_addr = inet_addr(ip);
-
-
+	
+	DataPacket packet;
+	// send 5 correct packets
         for (int i=1; i<= COUNT; i++ ){
-                DataPacket packet = getDatapacket(11,i);
+                packet = getDatapacket(11,i);
                 send_packet(sockfd, &addr, &packet, addr_size);
         }
+
+	//send 1 correct and 4 incorrect packets
+	//1 correct packet
+	packet = getDatapacket(11,6);
+	send_packet(sockfd, &addr, &packet, addr_size);
+	
+	//2 out of sequence
+	packet = getDatapacket(11,8);
+	send_packet(sockfd, &addr, &packet, addr_size);
+
+	//3 length mismatch
+	packet = getDatapacket(11,9);
+	send_packet(sockfd, &addr, &packet, addr_size);
+	
+	//4 End of packet missing
+	packet = getDatapacket(11,10);
+	send_packet(sockfd, &addr, &packet, addr_size);
+	
+	//5 Duplicate packet	
+	packet = getDatapacket(11,10);
+	send_packet(sockfd, &addr, &packet, addr_size);
 
 /*
 	bzero(buffer, sizeof(DataPacket));
