@@ -42,6 +42,14 @@ int main()
 	//create socket
         sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 	
+	//set ack_timer
+	struct timeval ack_timer;
+	// Timeout Value as required
+	ack_timer.tv_sec = 3;
+	ack_timer.tv_usec = 0;
+
+	// verifying for connection to the server
+	setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ack_timer,sizeof(struct timeval));	
 	// apply address
         memset(&addr, '\0', sizeof(addr));
         addr.sin_family = AF_INET;

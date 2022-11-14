@@ -21,6 +21,7 @@ Student ID: W1641460
 void show(struct DataPacket dtp);
 
 ACKPacket generate_recv(struct DataPacket dp);
+RejectPacket generate_rej(struct DataPacket dp, int Rej_sub_code);
 void show_ack(struct ACKPacket ap);
 void show_rej(struct RejectPacket rp);
 int receive_packet(int sockfd,struct sockaddr_in*client_addr,socklen_t addr_size);
@@ -83,9 +84,22 @@ ACKPacket generate_recv(struct DataPacket dp){
 	rp.Ack = ACK;
 	rp.ReceivedSegmentNo = dp.SegmentNo;
 	rp.EndPacketId = END_IDENTIFIER;
-	printf("Generate ACK");
+	//printf("Generate ACK");
 	return rp;
 }
+RejectPacket generate_rej(struct DataPacket dp, int Rej_sub_code){
+        struct RejectPacket jp;
+        jp.StartPacketId = START_IDENTIFIER;
+        jp.ClientId = dp.ClientId;
+        jp.Reject = REJECT;
+	jp.Reject_sub_code = Rej_sub_code; 
+        jp.ReceivedSegmentNo = dp.SegmentNo;
+        jp.EndPacketId = END_IDENTIFIER;
+        //printf("Generate ACK");
+        return jp;
+}
+
+
 int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_size) {
         // 1. call recvfrom to receive packet from client
         // 2. check packet, if packet is wrong, print error
