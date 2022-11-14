@@ -23,7 +23,7 @@ DataPacket getDatapacket(int clientid, int n);
 //define a function for show datapacket
 void show(struct DataPacket dtp);
 // define send_packet function
-int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp); 
+int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t addr_size); 
 
 int main()
 {
@@ -49,7 +49,7 @@ int main()
 
         for (int i=1; i<= COUNT; i++ ){
                 DataPacket packet = getDatapacket(11,i);
-                send_packet(sockfd, &addr, &packet);
+                send_packet(sockfd, &addr, &packet, addr_size);
         }
 
 /*
@@ -82,19 +82,31 @@ DataPacket getDatapacket(int clientid,int n) {
 
         return dp;
 }
-int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp) {
+int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t addr_size) {
         // 1. Call sendto to send packet to server.
         // 2. Call recvfrom to receive ack / reject from server.
         // 3. If timeout, start timer, go back to 2 if not running out of retries
         // 4. If get ack / reject, check packet, return 0 for sucess, or error code for failures
         // 5. Print error (ack, reject wrong / final timeout), return final error cod
 	uint8_t *buffer = (uint8_t *)(dp);
-	for(int i = 0; i < sizeof(*dp); i++) {
-		printf("%x ", buffer[i]);
-	}
-	printf("\n");
         int ret = sendto(sockfd, buffer, sizeof(*dp),0, (struct sockaddr *)addr, sizeof(*addr));
 	printf("Packet send %d bytes\n", ret);
+
+	//receive ack packet
+	ACKPacket *ap = malloc(sizeof(ACKPacket));
+        printf("begin buffer");
+
+	buffer = (uint8_t *)(ap);	
+	addr_size = sizeof(addr);
+	printf("begin receive ack");
+	int rev_ack = recvfrom(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&addr, &addr_size);
+	printf("ACK received %d bytes\n", rev_ack);
+	for(int i = 0; i < sizeof(*ap); i++) {
+                printf("%x ", buffer[i]);
+        }
+        printf("\n");
+
+	printf("Ack received");
 	return ret;
 }
 void show(struct DataPacket dtp){

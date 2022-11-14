@@ -11,6 +11,7 @@ Student ID: W1641460
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <errno.h>
 #include "packet.h"
 
 //define prot
@@ -19,7 +20,10 @@ Student ID: W1641460
 //define a function for show datapacket
 void show(struct DataPacket dtp);
 
+ACKPacket generate_recv(struct DataPacket dp);
+void show_ack(struct ACKPacket ap);
 int receive_packet(int sockfd,struct sockaddr_in*client_addr,socklen_t addr_size);
+
 int main()
 {
 
@@ -71,7 +75,16 @@ int main()
 	return 0;
 }
 
-
+ACKPacket generate_recv(struct DataPacket dp){
+	struct ACKPacket rp;
+	rp.StartPacketId = START_IDENTIFIER;
+	rp.ClientId = dp.ClientId;
+	rp.Ack = ACK;
+	rp.ReceivedSegmentNo = dp.SegmentNo;
+	rp.EndPacketId = END_IDENTIFIER;
+	printf("Generate ACK");
+	return rp;
+}
 int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_size) {
         // 1. call recvfrom to receive packet from client
         // 2. check packet, if packet is wrong, print error
@@ -79,13 +92,27 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
         // 4. replace last packet seqno to be current packet seqno, if seqno = last seq + 1
         int rev = 1;
 	DataPacket *dp = malloc(sizeof(DataPacket));
+	ACKPacket *ap = malloc(sizeof(ACKPacket));
 	while(rev>0){
 		addr_size = sizeof(client_addr);
 		uint8_t *buffer = (uint8_t *)dp;
-
         	rev = recvfrom(sockfd, buffer, sizeof(DataPacket), 0,(struct sockaddr*)&client_addr, &addr_size);
 		printf("received %d bytes\n", rev);
 		show(*dp);
+
+		*ap = generate_recv(*dp);
+		show_ack(*ap);
+		buffer = (uint8_t *)ap;
+
+	        for(int i = 0; i < sizeof(*ap); i++) {
+        	        printf("%x ", buffer[i]);
+        	}
+        	printf("\n");
+
+		// Must use the addr_size from the previous recvfrom to specify addr length
+		int send_ack = sendto(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&client_addr, addr_size);
+		printf("ACK send ack %d bytes, errno=%d\n", send_ack, errno);
+
 	}
 
        	return rev;
@@ -102,4 +129,11 @@ void show(struct DataPacket dtp){
         printf("\nEnd of Packet id:%x\n", dtp.EndPacketId);
 
 }
+void show_ack(struct ACKPacket ap){
 
+        printf("\nStart of Packet id:%x\n", ap.StartPacketId);
+	printf("\nClient id:%x\n", ap.ClientId);
+        printf("\nAck:%x\n", ap.Ack);
+        printf("\nreceived no:%x\n", ap.ReceivedSegmentNo);
+	printf("\nEnd of Packet id:%x\n", ap.EndPacketId);
+}
