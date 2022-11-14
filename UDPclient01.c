@@ -59,7 +59,7 @@ int main()
 	DataPacket packet;
 	// send 5 correct packets
         for (int i=1; i<= COUNT; i++ ){
-                packet = getDatapacket(11,i);
+               packet = getDatapacket(11,i);
                 send_packet(sockfd, &addr, &packet, addr_size);
         }
 
@@ -74,10 +74,12 @@ int main()
 
 	//3 length mismatch
 	packet = getDatapacket(11,9);
+	packet.Length = 3;
 	send_packet(sockfd, &addr, &packet, addr_size);
 	
 	//4 End of packet missing
 	packet = getDatapacket(11,10);
+	packet.EndPacketId = 0;
 	send_packet(sockfd, &addr, &packet, addr_size);
 	
 	//5 Duplicate packet	
