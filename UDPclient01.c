@@ -122,54 +122,78 @@ int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t 
         // 3. If timeout, start timer, go back to 2 if not running out of retries
         // 4. If get ack / reject, check packet, return 0 for sucess, or error code for failures
         // 5. Print error (ack, reject wrong / final timeout), return final error cod
-	uint8_t *buffer = (uint8_t *)(dp);
+	uint8_t *buffer;
+	buffer = (uint8_t *)(dp);
         int ret = sendto(sockfd, buffer, sizeof(*dp),0, (struct sockaddr *)addr, sizeof(*addr));
 	printf("Packet send %d bytes\n", ret);
 
-	//receive ack packet
-	ACKPacket *ap = malloc(sizeof(ACKPacket));
-        printf("begin buffer");
+	//receive packet
+	printf("begin packet receive");
+	addr_size = sizeof(addr);	
+	
+	//buffer =  malloc(sizeof(RejectPacket));
+	//buffer[1024];
+	//ACKPacket *ap = malloc(sizeof(ACKPacket));
+	//buffer = (uint8_t *)(ap);
 
-	buffer = (uint8_t *)(ap);	
-	addr_size = sizeof(addr);
-	printf("begin receive ack");
-	int rev_ack = recvfrom(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&addr, &addr_size);
+	int rev_pack = recvfrom(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&addr, &addr_size);
+	printf("ACK received %d bytes\n", rev_pack);
+	printf("buffer size:%d", sizeof(buffer));
+        for(int i = 0; i < sizeof(buffer); i++) {
+                printf("%x ", buffer[i]);
+        }
+        printf("\n");
+
+	//ACKPacket *ap = malloc(sizeof(ACKPacket));
+	//RejectPacket *rjp = malloc(sizeof(RejectPacket));
+        //if(sizeof(*buffer)>8){
+	//(uint8_t *)(rjp) = *buffer;
+	//}else{
+	//(uint8_t *)(ap) = *buffer;
+	//}
+	
+	//printf("begin buffer");
+
+	//buffer = (uint8_t *)(ap);	
+	//addr_size = sizeof(addr);
+	//printf("begin receive ack");
+	//int rev_ack = recvfrom(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&addr, &addr_size);
 	//show_ack(*ap);
-	printf("ACK received %d bytes\n", rev_ack);
+	//printf("ACK received %d bytes\n", rev_ack);
 	//for(int i = 0; i < sizeof(*ap); i++) {
         //        printf("%x ", buffer[i]);
         //}
         //printf("\n");
 
-	printf("Ack received");
+	//printf("Ack received");
 	return ret;
 }
 void show(struct DataPacket dtp){
-        printf("\nStart of Packet id:%x\n", dtp.StartPacketId);
-        printf("\nClient ID:%x\n", dtp.ClientId);
-        printf("\nDATA:%x\n",dtp.Data);
-        printf("\nSegment No:%x\n", dtp.SegmentNo);
-        printf("\nLength:%x\n", dtp.SegmentNo);
-        printf("\nPayload:%x\n", dtp.Payload);
-        printf("\nEnd of Packet id:%x\n", dtp.EndPacketId);
+        printf("\nStart of Packet id:%x ", dtp.StartPacketId);
+        printf("\nClient ID:%x ", dtp.ClientId);
+        printf("\nDATA:%x",dtp.Data);
+        printf("\nSegment No:%x ", dtp.SegmentNo);
+        printf("\nLength:%x ", dtp.SegmentNo);
+        printf("\nPayload:%x ", dtp.Payload);
+        printf("\nEnd of Packet id:%x \n", dtp.EndPacketId);
 
 }
 void show_ack(struct ACKPacket ap){
 
-        printf("\nStart of Packet id:%x\n", ap.StartPacketId);
-        printf("\nClient id:%x\n", ap.ClientId);
-        printf("\nAck:%x\n", ap.Ack);
-        printf("\nreceived no:%x\n", ap.ReceivedSegmentNo);
-        printf("\nEnd of Packet id:%x\n", ap.EndPacketId);
+        printf("\nStart of Packet id:%x ", ap.StartPacketId);
+        printf("\nClient id:%x ", ap.ClientId);
+        printf("\nAck:%x ", ap.Ack);
+        printf("\nreceived no:%x ", ap.ReceivedSegmentNo);
+        printf("\nEnd of Packet id:%x \n", ap.EndPacketId);
 }
 
 void show_rej(struct RejectPacket rp){
 
-        printf("\nStart of Packet id:%x\n", rp.StartPacketId);
-        printf("\nClient id:%x\n", rp.ClientId);
-        printf("\nRej:%x\n", rp.Reject);
-        printf("\nreject sub no:%x\n", rp.Reject_sub_code);
-        printf("\nreceived no:%x\n", rp.ReceivedSegmentNo);
-        printf("\nEnd of Packet id:%x\n", rp.EndPacketId);
+        printf("\nStart of Packet id:%x ", rp.StartPacketId);
+        printf("\nClient id:%x ", rp.ClientId);
+        printf("\nRej:%x ", rp.Reject);
+        printf("\nreject sub no:%x ", rp.Reject_sub_code);
+        printf("\nreceived no:%x ", rp.ReceivedSegmentNo);
+        printf("\nEnd of Packet id:%x\n ", rp.EndPacketId);
 }
 
