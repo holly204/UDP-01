@@ -155,14 +155,14 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
 			printf("ACK send ack %d bytes, errno=%d\n", send_ack, errno);
 		}
 		else{
-			RejectPacket *rjp = malloc(sizeof(RejectPacket));
-			*rjp = generate_rej(*dp, response_type);
+			//RejectPacket *rjp = malloc(sizeof(RejectPacket));
+			//*rjp = generate_rej(*dp, response_type);
 			//show_ack(*ap);
-			buffer = (uint8_t *)rjp;
-
+			//buffer = (uint8_t *)rjp;
+			uint8_t ack_or_reject[sizeof(ACKPacket) + sizeof(RejectPacket)] = {0};
 
 			// Must use the addr_size from the previous recvfrom to specify addr length
-			int send_rjk = sendto(sockfd, buffer, sizeof(RejectPacket), 0, (struct sockaddr*)&client_addr, addr_size);
+			int send_rjk = sendto(sockfd, ack_or_reject, sizeof(ack_or_reject), 0, (struct sockaddr*)&client_addr, addr_size);
 			//printf("Rej send  %d bytes, errno=%d\n", send_rjk, errno);
 			printf("Send Reject");
 		}

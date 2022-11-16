@@ -135,12 +135,13 @@ int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t 
 	//buffer[1024];
 	//ACKPacket *ap = malloc(sizeof(ACKPacket));
 	//buffer = (uint8_t *)(ap);
-
-	int rev_pack = recvfrom(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&addr, &addr_size);
+	//
+	
+	uint8_t ack_or_reject[sizeof(ACKPacket) + sizeof(RejectPacket)] = {0};
+	int rev_pack = recvfrom(sockfd, ack_or_reject, sizeof(ack_or_reject), 0, (struct sockaddr*)&addr, &addr_size);
 	printf("ACK received %d bytes\n", rev_pack);
-	printf("buffer size:%d", sizeof(buffer));
-        for(int i = 0; i < sizeof(buffer); i++) {
-                printf("%x ", buffer[i]);
+        for(int i = 0; i < sizeof(ack_or_reject); i++) {
+                printf("%x ", ack_or_reject[i]);
         }
         printf("\n");
 
