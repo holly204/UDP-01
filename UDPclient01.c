@@ -20,7 +20,9 @@ Student ID: W1641460
 #define COUNT 5
 //define a function for get datapacket
 DataPacket getDatapacket(int clientid, int n);
+ACKPacket packet_convert(struct RejectPacket rej);
 //define a function for show datapacket
+
 void show(struct DataPacket dtp);
 void show_ack(struct ACKPacket ap);
 void show_rej(struct RejectPacket rp);
@@ -31,12 +33,10 @@ int main()
 {
 
 	char *ip = "127.0.0.1";
-
+	int clientid = 11;
         int sockfd;
         struct sockaddr_in addr;
         
-	// char buffer[1024];
-	
         socklen_t addr_size;
 	
 	//create socket
@@ -58,51 +58,38 @@ int main()
 	
 	DataPacket packet;
 	// send 5 correct packets
-        for (int i=1; i<= COUNT; i++ ){
-               packet = getDatapacket(11,i);
-                send_packet(sockfd, &addr, &packet, addr_size);
-        }
+       // for (int i=1; i<= COUNT; i++ ){
+       //        packet = getDatapacket(11,i);
+        //        send_packet(sockfd, &addr, &packet, addr_size);
+        //}
 
 	//send 1 correct and 4 incorrect packets
 	//1 correct packet
-	packet = getDatapacket(11,6);
+	packet = getDatapacket(clientid,1);
 	send_packet(sockfd, &addr, &packet, addr_size);
 	
 	//2 out of sequence
-	packet = getDatapacket(11,8);
-	send_packet(sockfd, &addr, &packet, addr_size);
+	//packet = getDatapacket(11,8);
+	//send_packet(sockfd, &addr, &packet, addr_size);
 
 	//3 length mismatch
-	packet = getDatapacket(11,9);
-	packet.Length = 3;
-	send_packet(sockfd, &addr, &packet, addr_size);
+	//packet = getDatapacket(11,9);
+	//packet.Length = 3;
+	//send_packet(sockfd, &addr, &packet, addr_size);
 	
 	//4 End of packet missing
-	packet = getDatapacket(11,10);
-	packet.EndPacketId = 0;
-	send_packet(sockfd, &addr, &packet, addr_size);
+	//packet = getDatapacket(11,10);
+	//packet.EndPacketId = 0;
+	//send_packet(sockfd, &addr, &packet, addr_size);
 	
 	//5 Duplicate packet	
-	packet = getDatapacket(11,10);
-	send_packet(sockfd, &addr, &packet, addr_size);
-
-/*
-	bzero(buffer, sizeof(DataPacket));
-	strcpy(buffer, "Hello, world!");
-	//sendto(sockfd, buffer, sizeof(DataPacket), 0, (struct sockaddr*)&addr, sizeof(addr));
-	printf("[+]Data send:%s \n",buffer );
-
-	bzero(buffer, sizeof(DataPacket));
-	addr_size = sizeof(addr);
-	recvfrom(sockfd, buffer, sizeof(DataPacket), 0, (struct sockaddr*)&addr, &addr_size);
-	printf("[+]Data recv: %s\n", buffer);
-*/	
+	//packet = getDatapacket(11,10);
+	//send_packet(sockfd, &addr, &packet, addr_size);
 
 	return 0;
 }
 
 DataPacket getDatapacket(int clientid,int n) {
-
 
         struct DataPacket dp;
 
@@ -126,55 +113,33 @@ int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t 
 	buffer = (uint8_t *)(dp);
         int ret = sendto(sockfd, buffer, sizeof(*dp),0, (struct sockaddr *)addr, sizeof(*addr));
 	printf("Packet send %d bytes\n", ret);
-
+	show(*dp);
 	//receive packet
 	printf("begin packet receive");
 	addr_size = sizeof(addr);	
-	
-	//buffer =  malloc(sizeof(RejectPacket));
-	//buffer[1024];
-	//ACKPacket *ap = malloc(sizeof(ACKPacket));
-	//buffer = (uint8_t *)(ap);
-	//
-	
-	uint8_t ack_or_reject[sizeof(ACKPacket) + sizeof(RejectPacket)] = {0};
+	uint8_t *ack_or_reject[sizeof(RejectPacket)] = {0};
+	//RejectPacket *rjp = malloc(sizeof(RejectPacket));
 	int rev_pack = recvfrom(sockfd, ack_or_reject, sizeof(ack_or_reject), 0, (struct sockaddr*)&addr, &addr_size);
 	printf("ACK received %d bytes\n", rev_pack);
-        for(int i = 0; i < sizeof(ack_or_reject); i++) {
-                printf("%x ", ack_or_reject[i]);
-        }
-        printf("\n");
+	if(rev_pack == 10){
+		ACKPacket *ack;
+		ack = (ACKPacket*)ack_or_reject;
+		show_ack(*ack);
+	}else{
+		RejectPacket *rjp;
+		rjp = (RejectPacket *)ack_or_reject;
+		show_rej(*rjp);
+	}
 
-	//ACKPacket *ap = malloc(sizeof(ACKPacket));
-	//RejectPacket *rjp = malloc(sizeof(RejectPacket));
-        //if(sizeof(*buffer)>8){
-	//(uint8_t *)(rjp) = *buffer;
-	//}else{
-	//(uint8_t *)(ap) = *buffer;
-	//}
-	
-	//printf("begin buffer");
-
-	//buffer = (uint8_t *)(ap);	
-	//addr_size = sizeof(addr);
-	//printf("begin receive ack");
-	//int rev_ack = recvfrom(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&addr, &addr_size);
-	//show_ack(*ap);
-	//printf("ACK received %d bytes\n", rev_ack);
-	//for(int i = 0; i < sizeof(*ap); i++) {
-        //        printf("%x ", buffer[i]);
-        //}
-        //printf("\n");
-
-	//printf("Ack received");
 	return ret;
 }
+
 void show(struct DataPacket dtp){
         printf("\nStart of Packet id:%x ", dtp.StartPacketId);
         printf("\nClient ID:%x ", dtp.ClientId);
         printf("\nDATA:%x",dtp.Data);
         printf("\nSegment No:%x ", dtp.SegmentNo);
-        printf("\nLength:%x ", dtp.SegmentNo);
+        printf("\nLength:%x ", dtp.Length);
         printf("\nPayload:%x ", dtp.Payload);
         printf("\nEnd of Packet id:%x \n", dtp.EndPacketId);
 

@@ -34,9 +34,6 @@ int main()
         int sockfd, b;
         struct sockaddr_in server_addr, client_addr;
         
-	//char buffer[1024];	
-	
-
         socklen_t addr_size;
 
         sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -57,23 +54,8 @@ int main()
         
 	}
 
-
         receive_packet(sockfd, &client_addr, addr_size);
 
-/*
-	bzero(buffer, sizeof(DataPacket));
-	addr_size = sizeof(client_addr);
-	recvfrom(sockfd, buffer, sizeof(DataPacket), 0,(struct sockaddr*)&client_addr, &addr_size);
-	printf("Data recv: %s \n", buffer);
-
-	DataPacket *dp = (DataPacket *)buffer;
-	receive_packet(*dp);
-        
-	bzero(buffer, sizeof(DataPacket));
-	strcpy(buffer, "Welcome to the UDP server!");
-	sendto(sockfd, buffer, sizeof(DataPacket), 0, (struct sockaddr*)&client_addr, sizeof(client_addr));
-	printf("Data send: %s\n", buffer);
-*/
 	return 0;
 }
 
@@ -84,7 +66,6 @@ ACKPacket generate_recv(struct DataPacket dp){
 	rp.Ack = ACK;
 	rp.ReceivedSegmentNo = dp.SegmentNo;
 	rp.EndPacketId = END_IDENTIFIER;
-	//printf("Generate ACK");
 	return rp;
 }
 RejectPacket generate_rej(struct DataPacket dp, int Rej_sub_code){
@@ -105,7 +86,6 @@ RejectPacket generate_rej(struct DataPacket dp, int Rej_sub_code){
 	}
         jp.ReceivedSegmentNo = dp.SegmentNo;
         jp.EndPacketId = END_IDENTIFIER;
-        //printf("Generate ACK");
         return jp;
 }
 
@@ -148,21 +128,23 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
 			ACKPacket *ap = malloc(sizeof(ACKPacket));
 			*ap = generate_recv(*dp);
 			//show_ack(*ap);
-			buffer = (uint8_t *)ap;
+			//buffer = (uint8_t *)ap;
 
 			// Must use the addr_size from the previous recvfrom to specify addr length
-			int send_ack = sendto(sockfd, buffer, sizeof(ACKPacket), 0, (struct sockaddr*)&client_addr, addr_size);
-			printf("ACK send ack %d bytes, errno=%d\n", send_ack, errno);
+			int send_ack = sendto(sockfd, ap, sizeof(ACKPacket), 0, (struct sockaddr*)&client_addr, addr_size);
+			printf("ACK send ack %d bytes\n", send_ack);
+			show_ack(*ap);
+			//printf("ACK send ack %d bytes, errno=%d\n", send_ack, errno);
 		}
 		else{
-			//RejectPacket *rjp = malloc(sizeof(RejectPacket));
-			//*rjp = generate_rej(*dp, response_type);
+			RejectPacket *rjp = malloc(sizeof(RejectPacket));
+			*rjp = generate_rej(*dp, response_type);
 			//show_ack(*ap);
 			//buffer = (uint8_t *)rjp;
-			uint8_t ack_or_reject[sizeof(ACKPacket) + sizeof(RejectPacket)] = {0};
+			//uint8_t ack_or_reject[sizeof(ACKPacket) + sizeof(RejectPacket)] = {0};
 
 			// Must use the addr_size from the previous recvfrom to specify addr length
-			int send_rjk = sendto(sockfd, ack_or_reject, sizeof(ack_or_reject), 0, (struct sockaddr*)&client_addr, addr_size);
+			int send_rjk = sendto(sockfd, rjp, sizeof(RejectPacket), 0, (struct sockaddr*)&client_addr, addr_size);
 			//printf("Rej send  %d bytes, errno=%d\n", send_rjk, errno);
 			printf("Send Reject");
 		}
@@ -175,7 +157,7 @@ void show(struct DataPacket dtp){
         printf("\nClient ID:%x  ", dtp.ClientId);
         printf("\nDATA:%x ",dtp.Data);
         printf("\nSegment No:%x ", dtp.SegmentNo);
-        printf("\nLength:%x ", dtp.SegmentNo);
+        printf("\nLength:%x ", dtp.Length);
         printf("\nPayload:%x ", dtp.Payload);
         printf("\nEnd of Packet id:%x \n", dtp.EndPacketId);
 
