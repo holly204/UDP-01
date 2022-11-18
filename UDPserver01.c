@@ -105,6 +105,10 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
         	rev = recvfrom(sockfd, buffer, sizeof(DataPacket), 0,(struct sockaddr*)&client_addr, &addr_size);
 		printf("received %d bytes\n", rev);
 		show(*dp);
+		if(dp->ClientId==0){
+			printf("Ignore client 0\n");
+			break;
+		}
 		if (dp->SegmentNo != last_seg + 1){
 			if(dp->SegmentNo == last_seg){
 				response_type = 4; //duplicate
