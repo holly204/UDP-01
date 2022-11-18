@@ -61,11 +61,11 @@ int main()
 
 ACKPacket generate_recv(struct DataPacket dp){
 	struct ACKPacket rp;
-	rp.StartPacketId = START_IDENTIFIER;
+	rp.StartPacketId = dp.StartPacketId;
 	rp.ClientId = dp.ClientId;
 	rp.Ack = ACK;
 	rp.ReceivedSegmentNo = dp.SegmentNo;
-	rp.EndPacketId = END_IDENTIFIER;
+	rp.EndPacketId = dp.EndPacketId;
 	return rp;
 }
 RejectPacket generate_rej(struct DataPacket dp, int Rej_sub_code){
@@ -120,12 +120,12 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
 		last_seg = dp->SegmentNo;
 
 		//check missing EndPacketId
-		if (dp->EndPacketId = 0){
+		if (dp->EndPacketId != END_IDENTIFIER){
 			response_type = 3;
 		}
 
 		//check payload length
-		if(dp->Length != strlen(dp->Payload)){
+		if(dp->Length != sizeof(dp->Payload)){
 			response_type = 2;
 		}
 		if (response_type == 0){

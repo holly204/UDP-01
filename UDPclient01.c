@@ -65,8 +65,8 @@ int main()
 
 	//send 1 correct and 4 incorrect packets
 	//1 correct packet
-	packet = getDatapacket(1,1);
-	send_packet(sockfd, &addr, &packet, addr_size);
+	//packet = getDatapacket(1,1);
+	//send_packet(sockfd, &addr, &packet, addr_size);
 	
 	//packet = getDatapacket(clientid,3);
 	//send_packet(sockfd, &addr, &packet, addr_size);	
@@ -75,14 +75,14 @@ int main()
 	//send_packet(sockfd, &addr, &packet, addr_size);
 
 	//3 length mismatch
-	//packet = getDatapacket(11,9);
+	//packet = getDatapacket(11,1);
 	//packet.Length = 3;
 	//send_packet(sockfd, &addr, &packet, addr_size);
 	
 	//4 End of packet missing
-	//packet = getDatapacket(11,10);
-	//packet.EndPacketId = 0;
-	//send_packet(sockfd, &addr, &packet, addr_size);
+	packet = getDatapacket(11,1);
+	packet.EndPacketId = 0;
+	send_packet(sockfd, &addr, &packet, addr_size);
 	
 	//5 Duplicate packet	
 	//packet = getDatapacket(11,10);
@@ -103,7 +103,7 @@ DataPacket getDatapacket(int clientid,int n) {
         char string[255];
 	printf(string, "This packet is sent by:%d and SegmentNo is %d.", clientid, n);
 	strcpy(dp.Payload, string);
-	dp.Length = strlen(dp.Payload);
+	dp.Length = sizeof(dp.Payload);
         dp.EndPacketId = END_IDENTIFIER;
 
         return dp;
@@ -156,7 +156,7 @@ int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t 
 			continue;
 		}
 	}
-	printf("Server did not respond, abort sending.\n");
+	printf("Server does not respond\n");
 	return -255;
 }
 
