@@ -98,8 +98,11 @@ DataPacket getDatapacket(int clientid,int n) {
         dp.ClientId = clientid;
         dp.Data = DATA;
         dp.SegmentNo = n;
-	strcpy(dp.Payload,"The packet is send by client");
-        dp.Length = strlen(dp.Payload);
+	//strcpy(dp.Payload,"The packet is send by client");
+        char string[255];
+	printf(string, "This packet is sent by:%d and SegmentNo is %d.", clientid, n);
+	strcpy(dp.Payload, string);
+	dp.Length = strlen(dp.Payload);
         dp.EndPacketId = END_IDENTIFIER;
 
         return dp;
