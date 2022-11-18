@@ -20,7 +20,6 @@ Student ID: W1641460
 #define COUNT 5
 //define a function for get datapacket
 DataPacket getDatapacket(int clientid, int n);
-ACKPacket packet_convert(struct RejectPacket rej);
 //define a function for show datapacket
 
 void show(struct DataPacket dtp);
@@ -127,6 +126,7 @@ int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t 
 		ACKPacket *ack;
 		ack = (ACKPacket*)ack_or_reject;
 		show_ack(*ack);
+		printf("Clientid: %d ,Segment No %d ACK was send\n", ack->ClientId,ack->ReceivedSegmentNo);
 	}else{
 		RejectPacket *rjp;
 		rjp = (RejectPacket *)ack_or_reject;
