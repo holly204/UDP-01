@@ -68,6 +68,8 @@ int main()
 	packet = getDatapacket(clientid,1);
 	send_packet(sockfd, &addr, &packet, addr_size);
 	
+	packet = getDatapacket(clientid,3);
+	send_packet(sockfd, &addr, &packet, addr_size);	
 	//2 out of sequence
 	//packet = getDatapacket(11,8);
 	//send_packet(sockfd, &addr, &packet, addr_size);
@@ -129,6 +131,15 @@ int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t 
 		RejectPacket *rjp;
 		rjp = (RejectPacket *)ack_or_reject;
 		show_rej(*rjp);
+		if(rjp->Reject_sub_code == REJECT_OUT_SEQUENCE){
+			printf("Clientid: %d ,Segment No %d was Reject due to Out of sequence\n", rjp->ClientId,rjp->ReceivedSegmentNo);
+		}else if(rjp->Reject_sub_code == REJECT_lENGTH_MISMATCH){
+			printf("Clientid: %d ,Segment No %d was Reject due to length mismatch\n", rjp->ClientId,rjp->ReceivedSegmentNo);
+		}else if(rjp->Reject_sub_code == REJECT_DATA_MISSING){
+			printf("Clientid: %d ,Segment No %d was Reject due to End of packet missing\n", rjp->ClientId,rjp->ReceivedSegmentNo);
+		}else if(rjp->Reject_sub_code == REJECT_DUPLICATE){
+			printf("Clientid: %d ,Segment No %d was Reject due to Duplicate packet\n", rjp->ClientId,rjp->ReceivedSegmentNo);
+		}
 	}
 
 	return ret;
