@@ -116,8 +116,10 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
 			else{
 				 response_type = 1; //out of sequence
 			}
+		} else {
+			last_seg = dp->SegmentNo;
+			printf("Segment number updated to %d\n", last_seg);
 		}
-		last_seg = dp->SegmentNo;
 
 		//check missing EndPacketId
 		if (dp->EndPacketId != END_IDENTIFIER){
@@ -162,7 +164,7 @@ void show(struct DataPacket dtp){
         printf("\nDATA:%x ",dtp.Data);
         printf("\nSegment No:%x ", dtp.SegmentNo);
         printf("\nLength:%x ", dtp.Length);
-        printf("\nPayload:%x ", dtp.Payload);
+        printf("\nPayload:%s ", dtp.Payload);
         printf("\nEnd of Packet id:%x \n", dtp.EndPacketId);
 
 }

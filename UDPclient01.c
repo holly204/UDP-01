@@ -99,11 +99,8 @@ DataPacket getDatapacket(int clientid,int n) {
         dp.ClientId = clientid;
         dp.Data = DATA;
         dp.SegmentNo = n;
-	//strcpy(dp.Payload,"The packet is send by client");
-        char string[255];
-	printf(string, "This packet is sent by:%d and SegmentNo is %d.", clientid, n);
-	strcpy(dp.Payload, string);
-	dp.Length = sizeof(dp.Payload);
+	sprintf(dp.Payload, "This packet is sent by:%d and SegmentNo is %d.", clientid, n);
+	dp.Length = strlen(dp.Payload);
         dp.EndPacketId = END_IDENTIFIER;
 
         return dp;
@@ -152,7 +149,7 @@ int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t 
 			return -rjp->Reject_sub_code;		
 		}
 		else{
-			printf("Receive error, rev_pack=%d, errno=%d\n", rev_pack, errno);
+			printf("[ERROR] Receive error, rev_pack=%d, errno=%d\n", rev_pack, errno);
 			continue;
 		}
 	}
@@ -166,7 +163,7 @@ void show(struct DataPacket dtp){
         printf("\nDATA:%x",dtp.Data);
         printf("\nSegment No:%x ", dtp.SegmentNo);
         printf("\nLength:%x ", dtp.Length);
-        printf("\nPayload:%x ", dtp.Payload);
+        printf("\nPayload:%s ", dtp.Payload);
         printf("\nEnd of Packet id:%x \n", dtp.EndPacketId);
 
 }
