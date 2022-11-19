@@ -58,18 +58,19 @@ int main()
 	
 	DataPacket packet;
 	// send 5 correct packets
-       // for (int i=1; i<= COUNT; i++ ){
-       //        packet = getDatapacket(11,i);
-        //        send_packet(sockfd, &addr, &packet, addr_size);
-        //}
+        for (int i=1; i<= COUNT; i++ ){
+               packet = getDatapacket(clientid,i);
+               send_packet(sockfd, &addr, &packet, addr_size);
+        }
 
 	//send 1 correct and 4 incorrect packets
 	//1 correct packet
 	//packet = getDatapacket(1,1);
 	//send_packet(sockfd, &addr, &packet, addr_size);
 	
-	//packet = getDatapacket(clientid,3);
-	//send_packet(sockfd, &addr, &packet, addr_size);	
+	packet = getDatapacket(clientid,5);
+	send_packet(sockfd, &addr, &packet, addr_size);	
+	
 	//2 out of sequence
 	//packet = getDatapacket(11,8);
 	//send_packet(sockfd, &addr, &packet, addr_size);
@@ -80,9 +81,9 @@ int main()
 	//send_packet(sockfd, &addr, &packet, addr_size);
 	
 	//4 End of packet missing
-	packet = getDatapacket(11,1);
-	packet.EndPacketId = 0;
-	send_packet(sockfd, &addr, &packet, addr_size);
+	//packet = getDatapacket(11,1);
+	//packet.EndPacketId = 0;
+	//send_packet(sockfd, &addr, &packet, addr_size);
 	
 	//5 Duplicate packet	
 	//packet = getDatapacket(11,10);
