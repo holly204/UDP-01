@@ -69,7 +69,7 @@ ACKPacket generate_recv(struct DataPacket dp){
 //generate RejectPacket from DataPacket
 RejectPacket generate_rej(struct DataPacket dp, int Rej_sub_code){
         struct RejectPacket jp;
-        jp.StartPacketId = START_IDENTIFIER;
+        jp.StartPacketId = dp.StartPacketId;
         jp.ClientId = dp.ClientId;
         jp.Reject = REJECT;
 	if (Rej_sub_code == 1){
@@ -84,7 +84,7 @@ RejectPacket generate_rej(struct DataPacket dp, int Rej_sub_code){
 		jp.Reject_sub_code = 0;
 	}
         jp.ReceivedSegmentNo = dp.SegmentNo;
-        jp.EndPacketId = END_IDENTIFIER;
+        jp.EndPacketId = dp.EndPacketId;
         return jp;
 }
 
@@ -152,32 +152,32 @@ int receive_packet(int sockfd,struct sockaddr_in *client_addr, socklen_t addr_si
 }
 
 void show(struct DataPacket dtp){
-        printf("\n*****Received Datapacket from clinet***************");
-	printf("\nStart of Packet id:%x ", dtp.StartPacketId);
-        printf("\nClient ID:%d  ", dtp.ClientId);
-        printf("\nDATA:%x ",dtp.Data);
-        printf("\nSegment No:%d ", dtp.SegmentNo);
-        printf("\nLength:%x ", dtp.Length);
-        printf("\nPayload:%s ", dtp.Payload);
-        printf("\nEnd of Packet id:%x \n", dtp.EndPacketId);
+        printf("*****Received Datapacket from clinet***************\n");
+	printf("Start of Packet id:%x \n", dtp.StartPacketId);
+        printf("Client ID:%d  \n", dtp.ClientId);
+        printf("DATA:%x \n",dtp.Data);
+        printf("Segment No:%d \n", dtp.SegmentNo);
+        printf("Length:%x \n", dtp.Length);
+        printf("Payload:%s \n", dtp.Payload);
+        printf("End of Packet id:%x \n", dtp.EndPacketId);
 
 }
 void show_ack(struct ACKPacket ap){
-	printf("\n********ACK Packet was send back to client***********");
-        printf("\nStart of Packet id:%x ", ap.StartPacketId);
-	printf("\nClient id:%d ", ap.ClientId);
-        printf("\nAck:%x ", ap.Ack);
-        printf("\nreceived no:%d ", ap.ReceivedSegmentNo);
-	printf("\nEnd of Packet id:%x \n", ap.EndPacketId);
+	printf("********ACK Packet was send back to client***********\n");
+        printf("Start of Packet id:%x \n", ap.StartPacketId);
+	printf("Client id:%d \n", ap.ClientId);
+        printf("Ack:%x \n", ap.Ack);
+        printf("received no:%d \n", ap.ReceivedSegmentNo);
+	printf("End of Packet id:%x \n", ap.EndPacketId);
 }
 
 void show_rej(struct RejectPacket rp){
-	printf("\n********Reject Packet was send back to client***********");
-        printf("\nStart of Packet id:%x ", rp.StartPacketId);
-        printf("\nClient id:%d ", rp.ClientId);
-        printf("\nRej:%x ", rp.Reject);
-        printf("\nreject sub no:%x ", rp.Reject_sub_code);
-	printf("\nreceived no:%d ", rp.ReceivedSegmentNo);
-        printf("\nEnd of Packet id:%x \n", rp.EndPacketId);
+	printf("********Reject Packet was send back to client***********\n");
+        printf("Start of Packet id:%x \n", rp.StartPacketId);
+        printf("Client id:%d \n", rp.ClientId);
+        printf("Rej:%x \n", rp.Reject);
+        printf("reject sub no:%x \n", rp.Reject_sub_code);
+	printf("received no:%d \n", rp.ReceivedSegmentNo);
+        printf("End of Packet id:%x \n", rp.EndPacketId);
 }
 

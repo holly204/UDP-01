@@ -19,10 +19,8 @@ Student ID: W1641460
 #define PORT 8800
 //define COUNT 5
 #define COUNT 5
-//define a function for get datapacket
+//define functions
 DataPacket getDatapacket(int clientid, int n);
-//define a function for show datapacket
-
 void show(struct DataPacket dtp);
 void show_ack(struct ACKPacket ap);
 void show_rej(struct RejectPacket rp);
@@ -64,38 +62,39 @@ int main()
         }
 
 	//send 1 correct and 4 incorrect packets
-	//1 correct packet
-	//packet = getDatapacket(1,1);
-	//send_packet(sockfd, &addr, &packet, addr_size);
 	
-	packet = getDatapacket(clientid,5);
+
+        //emulating Duplicate packet
+        packet = getDatapacket(clientid,5);
+        send_packet(sockfd, &addr, &packet, addr_size);
+
+	//emulating out of sequence	
+	packet = getDatapacket(clientid,7);
 	send_packet(sockfd, &addr, &packet, addr_size);	
 	
-	//2 out of sequence
-	//packet = getDatapacket(11,8);
-	//send_packet(sockfd, &addr, &packet, addr_size);
-
-	//3 length mismatch
-	//packet = getDatapacket(11,1);
-	//packet.Length = 3;
-	//send_packet(sockfd, &addr, &packet, addr_size);
+	//emulating length mismatch
+	packet = getDatapacket(clientid,6);
+	packet.Length = 3;
+	send_packet(sockfd, &addr, &packet, addr_size);
 	
-	//4 End of packet missing
-	//packet = getDatapacket(11,1);
-	//packet.EndPacketId = 0;
-	//send_packet(sockfd, &addr, &packet, addr_size);
+	//emulating End of packet missing
+	packet = getDatapacket(clientid,6);
+	packet.EndPacketId = 0;
+	send_packet(sockfd, &addr, &packet, addr_size);
 	
-	//5 Duplicate packet	
-	//packet = getDatapacket(11,10);
-	//send_packet(sockfd, &addr, &packet, addr_size);
-
+	// after reject packt send oen correct  packet	
+	packet = getDatapacket(clientid,6); 
+	send_packet(sockfd, &addr, &packet, addr_size);
+	
+	//emulating print Error message after resending the same packet 3 times without responds
+	packet = getDatapacket(0,7);
+	send_packet(sockfd, &addr, &packet, addr_size);
 	return 0;
 }
 
+//get datapacket
 DataPacket getDatapacket(int clientid,int n) {
-
         struct DataPacket dp;
-
         dp.StartPacketId = START_IDENTIFIER;
         dp.ClientId = clientid;
         dp.Data = DATA;
@@ -103,7 +102,6 @@ DataPacket getDatapacket(int clientid,int n) {
 	sprintf(dp.Payload, "This packet is sent by:%d and SegmentNo is %d.", clientid, n);
 	dp.Length = strlen(dp.Payload);
         dp.EndPacketId = END_IDENTIFIER;
-
         return dp;
 }
 int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t addr_size) {
@@ -112,78 +110,70 @@ int send_packet(int sockfd, struct sockaddr_in *addr, DataPacket *dp, socklen_t 
         // 3. If timeout, start timer, go back to 2 if not running out of retries
         // 4. If get ack / reject, check packet, return 0 for sucess, or error code for failures
         // 5. Print error (ack, reject wrong / final timeout), return final error cod
-	int ret =1;
-	int rev_pack = 0;
-	
 	for (int i = 0; i < 3; i++) {
 		uint8_t *buffer;
 		buffer = (uint8_t *)(dp);
-        	ret = sendto(sockfd, buffer, sizeof(*dp),0, (struct sockaddr *)addr, sizeof(*addr));
-		printf("Packet send %d bytes\n", ret);
+        	int ret = sendto(sockfd, buffer, sizeof(*dp),0, (struct sockaddr *)addr, sizeof(*addr));
 		show(*dp);
-		//receive packet
-		printf("begin packet receive\n");
 		addr_size = sizeof(addr);	
 		uint8_t *ack_or_reject[sizeof(RejectPacket)] = {0};
-		//RejectPacket *rjp = malloc(sizeof(RejectPacket));
-		rev_pack = recvfrom(sockfd, ack_or_reject, sizeof(ack_or_reject), 0, (struct sockaddr*)&addr, &addr_size);
-		printf("ACK received %d bytes\n", rev_pack);
+		int rev_pack = recvfrom(sockfd, ack_or_reject, sizeof(ack_or_reject), 0, (struct sockaddr*)&addr, &addr_size);
+		//get it is ACK packet or Reject packet by its size
 		if(rev_pack == sizeof(ACKPacket)){
 			ACKPacket *ack;
 			ack = (ACKPacket*)ack_or_reject;
 			show_ack(*ack);
-			printf("Clientid: %d ,Segment No %d ACK was send\n", ack->ClientId,ack->ReceivedSegmentNo);
 			return 0;
 		}else if(rev_pack == sizeof(RejectPacket)){
 			RejectPacket *rjp;
 			rjp = (RejectPacket *)ack_or_reject;
 			show_rej(*rjp);
 			if(rjp->Reject_sub_code == REJECT_OUT_SEQUENCE){
-				printf("Clientid: %d ,Segment No %d was Reject due to Out of sequence\n", rjp->ClientId,rjp->ReceivedSegmentNo);
+				printf("[ERROr]Clientid: %d ,Segment No %d was Reject due to Out of sequence\n", rjp->ClientId,rjp->ReceivedSegmentNo);
 			}else if(rjp->Reject_sub_code == REJECT_lENGTH_MISMATCH){
-				printf("Clientid: %d ,Segment No %d was Reject due to length mismatch\n", rjp->ClientId,rjp->ReceivedSegmentNo);
+				printf("[ERROR]Clientid: %d ,Segment No %d was Reject due to length mismatch\n", rjp->ClientId,rjp->ReceivedSegmentNo);
 			}else if(rjp->Reject_sub_code == REJECT_DATA_MISSING){
-				printf("Clientid: %d ,Segment No %d was Reject due to End of packet missing\n", rjp->ClientId,rjp->ReceivedSegmentNo);
+				printf("[ERROR]Clientid: %d ,Segment No %d was Reject due to End of packet missing\n", rjp->ClientId,rjp->ReceivedSegmentNo);
 			}else if(rjp->Reject_sub_code == REJECT_DUPLICATE){
-				printf("Clientid: %d ,Segment No %d was Reject due to Duplicate packet\n", rjp->ClientId,rjp->ReceivedSegmentNo);
+				printf("[ERROR]Clientid: %d ,Segment No %d was Reject due to Duplicate packet\n", rjp->ClientId,rjp->ReceivedSegmentNo);
 			}	
 			return -rjp->Reject_sub_code;		
 		}
 		else{
-			printf("[ERROR] Receive error, rev_pack=%d, errno=%d\n", rev_pack, errno);
 			continue;
 		}
 	}
-	printf("Server does not respond\n");
+	printf("[ERROR]Server does not respond\n");
 	return -255;
 }
 
 void show(struct DataPacket dtp){
-        printf("\nStart of Packet id:%x ", dtp.StartPacketId);
-        printf("\nClient ID:%x ", dtp.ClientId);
-        printf("\nDATA:%x",dtp.Data);
-        printf("\nSegment No:%x ", dtp.SegmentNo);
-        printf("\nLength:%x ", dtp.Length);
-        printf("\nPayload:%s ", dtp.Payload);
-        printf("\nEnd of Packet id:%x \n", dtp.EndPacketId);
+	printf("*********Send datapacket to server************\n");
+        printf("Start of Packet id:%x \n", dtp.StartPacketId);
+        printf("Client ID:%d \n", dtp.ClientId);
+        printf("DATA:%x\n",dtp.Data);
+        printf("Segment No:%d \n", dtp.SegmentNo);
+        printf("Length:%x \n", dtp.Length);
+        printf("Payload:%s \n", dtp.Payload);
+        printf("End of Packet id:%x \n", dtp.EndPacketId);
 
 }
 void show_ack(struct ACKPacket ap){
-
-        printf("\nStart of Packet id:%x ", ap.StartPacketId);
-        printf("\nClient id:%x ", ap.ClientId);
-        printf("\nAck:%x ", ap.Ack);
-        printf("\nreceived no:%x ", ap.ReceivedSegmentNo);
-        printf("\nEnd of Packet id:%x \n", ap.EndPacketId);
+	printf("*******Receive Ack packet from server*********\n");
+        printf("Start of Packet id:%x \n", ap.StartPacketId);
+        printf("Client id:%d \n", ap.ClientId);
+        printf("Ack:%x \n", ap.Ack);
+        printf("received no:%d \n", ap.ReceivedSegmentNo);
+        printf("End of Packet id:%x \n", ap.EndPacketId);
 }
 
 void show_rej(struct RejectPacket rp){
-
-        printf("\nStart of Packet id:%x ", rp.StartPacketId);
-        printf("\nClient id:%x ", rp.ClientId);
-        printf("\nRej:%x ", rp.Reject);
-        printf("\nreject sub no:%x ", rp.Reject_sub_code);
-        printf("\nreceived no:%x ", rp.ReceivedSegmentNo);
-        printf("\nEnd of Packet id:%x\n ", rp.EndPacketId);
+	printf("******Receive Reject packet from Server******\n");
+        printf("Start of Packet id:%x \n", rp.StartPacketId);
+        printf("Client id:%d \n", rp.ClientId);
+        printf("Rej:%x \n", rp.Reject);
+        printf("reject sub no:%x\n ", rp.Reject_sub_code);
+        printf("received no:%d\n ", rp.ReceivedSegmentNo);
+        printf("End of Packet id:%x\n ", rp.EndPacketId);
 }
 
