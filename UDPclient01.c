@@ -1,6 +1,6 @@
 /*
-COEN 233 Computer Networks
-Program assignment 1
+COEN 233 Computer Networks Program assignment 1
+Client using customized protocol on top of UDP protocol for sending information to the server
 Name: Li Huang
 Student ID: W1641460
 */
@@ -40,6 +40,7 @@ int main()
 	//create socket
         sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 	
+	
 	//set ack_timer
 	struct timeval ack_timer;
 	// Timeout Value as required
@@ -48,6 +49,7 @@ int main()
 
 	// verifying for connection to the server
 	setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&ack_timer,sizeof(struct timeval));	
+	
 	// apply address
         memset(&addr, '\0', sizeof(addr));
         addr.sin_family = AF_INET;
@@ -82,7 +84,7 @@ int main()
 	packet.EndPacketId = 0;
 	send_packet(sockfd, &addr, &packet, addr_size);
 	
-	// after reject packt send oen correct  packet	
+	// after reject packt send one correct packet	
 	packet = getDatapacket(clientid,6); 
 	send_packet(sockfd, &addr, &packet, addr_size);
 	
