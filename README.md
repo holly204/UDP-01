@@ -6,8 +6,12 @@ Name:Li Huang
 StudentID:W1641460
 
 
-The program contains two C files and one compile file:
-UDPserver01.c for the server UDPclient01.c for the client. 
+The program contains four files
+a header file : packet.h 
+the server: UDPserver01.c
+the client : UDPclient01.c
+a compile file: Makefile
+three screenshots PNG files of the error handling
 
 Compile:
 There is a compile file Makefile
@@ -17,4 +21,4 @@ Run:
 1. Execute the server first by using the command "./server"
 2. Open another terminal and command "./client" to run the client
 
-In addition, there are there screenshots PNG files of the error handling.   
+
