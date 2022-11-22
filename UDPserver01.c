@@ -12,6 +12,7 @@ Student ID: W1641460
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <unistd.h>
 #include "packet.h"
 
 //define prot
@@ -52,7 +53,7 @@ int main()
 	}
 	//receive and send back function
         server_loop(sockfd, &client_addr, addr_size);
-
+	close(sockfd);
 	return 0;
 }
 

@@ -13,6 +13,7 @@ Student ID: W1641460
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 #include "packet.h"
 
 //define port
@@ -91,6 +92,7 @@ int main()
 	//emulating print Error message after resending the same packet 3 times without responds
 	packet = getDatapacket(0,7);
 	send_packet(sockfd, &addr, &packet, addr_size);
+	close(sockfd);
 	return 0;
 }
 
