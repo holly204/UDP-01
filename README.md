@@ -2,9 +2,6 @@
 Program assignment 1:
 Client using customized protocol on top of UDP protocol for sending information to the server.
 
-Name:Li Huang
-StudentID:W1641460
-
 
 The program contains four files
 a header file : packet.h ;
